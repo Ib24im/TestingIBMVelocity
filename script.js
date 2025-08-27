@@ -7,9 +7,11 @@ class TodoApp {
         this.currentCategoryFilter = 'all';
         this.currentSearch = '';
         this.editingId = null;
+        this.isDarkTheme = this.loadTheme();
         
         this.initializeElements();
         this.attachEventListeners();
+        this.applyTheme();
         this.render();
         this.updateStats();
     }
@@ -18,6 +20,8 @@ class TodoApp {
         // Input elements
         this.todoInput = document.getElementById('todoInput');
         this.categorySelect = document.getElementById('categorySelect');
+        this.prioritySelect = document.getElementById('prioritySelect');
+        this.dueDateInput = document.getElementById('dueDateInput');
         this.addBtn = document.getElementById('addBtn');
         
         // Filter elements
@@ -35,14 +39,25 @@ class TodoApp {
         // Action buttons
         this.clearCompletedBtn = document.getElementById('clearCompleted');
         this.clearAllBtn = document.getElementById('clearAll');
+        this.exportBtn = document.getElementById('exportBtn');
+        this.importBtn = document.getElementById('importBtn');
+        this.importFile = document.getElementById('importFile');
         
         // Modal elements
         this.editModal = document.getElementById('editModal');
         this.editInput = document.getElementById('editInput');
         this.editCategorySelect = document.getElementById('editCategorySelect');
+        this.editPrioritySelect = document.getElementById('editPrioritySelect');
+        this.editDueDateInput = document.getElementById('editDueDateInput');
         this.closeModalBtn = document.getElementById('closeModal');
         this.cancelEditBtn = document.getElementById('cancelEdit');
         this.saveEditBtn = document.getElementById('saveEdit');
+        
+        // Theme and help elements
+        this.themeToggle = document.getElementById('themeToggle');
+        this.helpBtn = document.getElementById('helpBtn');
+        this.helpModal = document.getElementById('helpModal');
+        this.closeHelpBtn = document.getElementById('closeHelp');
     }
 
     attachEventListeners() {
@@ -70,6 +85,14 @@ class TodoApp {
         // Action buttons
         this.clearCompletedBtn.addEventListener('click', () => this.clearCompleted());
         this.clearAllBtn.addEventListener('click', () => this.clearAll());
+        this.exportBtn.addEventListener('click', () => this.exportTodos());
+        this.importBtn.addEventListener('click', () => this.importFile.click());
+        this.importFile.addEventListener('change', (e) => this.importTodos(e));
+        
+        // Theme and help
+        this.themeToggle.addEventListener('click', () => this.toggleTheme());
+        this.helpBtn.addEventListener('click', () => this.openHelpModal());
+        this.closeHelpBtn.addEventListener('click', () => this.closeHelpModal());
 
         // Modal events
         this.closeModalBtn.addEventListener('click', () => this.closeModal());
@@ -81,11 +104,20 @@ class TodoApp {
             if (e.target === this.editModal) this.closeModal();
         });
 
-        // Close modal on escape key
+        // Close modals on escape key
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && this.editModal.classList.contains('active')) {
-                this.closeModal();
+            if (e.key === 'Escape') {
+                if (this.editModal.classList.contains('active')) {
+                    this.closeModal();
+                } else if (this.helpModal.classList.contains('active')) {
+                    this.closeHelpModal();
+                }
             }
+        });
+        
+        // Close help modal on outside click
+        this.helpModal.addEventListener('click', (e) => {
+            if (e.target === this.helpModal) this.closeHelpModal();
         });
     }
 
@@ -96,6 +128,8 @@ class TodoApp {
     addTodo() {
         const text = this.todoInput.value.trim();
         const category = this.categorySelect.value;
+        const priority = this.prioritySelect.value;
+        const dueDate = this.dueDateInput.value;
 
         if (!text) {
             this.showNotification('Please enter a todo item', 'error');
@@ -106,6 +140,8 @@ class TodoApp {
             id: this.generateId(),
             text: text,
             category: category,
+            priority: priority,
+            dueDate: dueDate || null,
             completed: false,
             createdAt: new Date().toISOString(),
             completedAt: null
@@ -115,6 +151,8 @@ class TodoApp {
         this.saveTodos();
         this.todoInput.value = '';
         this.categorySelect.value = 'personal';
+        this.prioritySelect.value = 'medium';
+        this.dueDateInput.value = '';
         this.render();
         this.updateStats();
         this.showNotification('Todo added successfully!', 'success');
@@ -147,6 +185,8 @@ class TodoApp {
             this.editingId = id;
             this.editInput.value = todo.text;
             this.editCategorySelect.value = todo.category;
+            this.editPrioritySelect.value = todo.priority || 'medium';
+            this.editDueDateInput.value = todo.dueDate || '';
             this.openModal();
         }
     }
@@ -154,6 +194,8 @@ class TodoApp {
     saveEdit() {
         const newText = this.editInput.value.trim();
         const newCategory = this.editCategorySelect.value;
+        const newPriority = this.editPrioritySelect.value;
+        const newDueDate = this.editDueDateInput.value;
 
         if (!newText) {
             this.showNotification('Please enter a todo item', 'error');
@@ -164,6 +206,8 @@ class TodoApp {
         if (todo) {
             todo.text = newText;
             todo.category = newCategory;
+            todo.priority = newPriority;
+            todo.dueDate = newDueDate || null;
             this.saveTodos();
             this.render();
             this.closeModal();
@@ -180,6 +224,27 @@ class TodoApp {
         this.editModal.classList.remove('active');
         this.editingId = null;
         this.editInput.value = '';
+    }
+
+    toggleTheme() {
+        this.isDarkTheme = !this.isDarkTheme;
+        this.applyTheme();
+        this.saveTheme();
+        this.showNotification(`Switched to ${this.isDarkTheme ? 'dark' : 'light'} theme`, 'success');
+    }
+
+    applyTheme() {
+        document.body.setAttribute('data-theme', this.isDarkTheme ? 'dark' : 'light');
+        const icon = this.themeToggle.querySelector('i');
+        icon.className = this.isDarkTheme ? 'fas fa-sun' : 'fas fa-moon';
+    }
+
+    openHelpModal() {
+        this.helpModal.classList.add('active');
+    }
+
+    closeHelpModal() {
+        this.helpModal.classList.remove('active');
     }
 
     setFilter(filter) {
@@ -291,6 +356,8 @@ class TodoApp {
                         <div class="todo-text">${this.escapeHtml(todo.text)}</div>
                         <div class="todo-meta">
                             <span class="todo-category ${todo.category}">${this.capitalizeFirst(todo.category)}</span>
+                            <span class="todo-priority ${todo.priority}">${this.capitalizeFirst(todo.priority)}</span>
+                            ${todo.dueDate ? `<span class="todo-due-date ${this.getDueDateClass(todo.dueDate)}">Due ${this.formatDueDate(todo.dueDate)}</span>` : ''}
                             <span class="todo-date">Created ${this.formatDate(todo.createdAt)}</span>
                             ${todo.completed ? `<span class="completed-date">Completed ${this.formatDate(todo.completedAt)}</span>` : ''}
                         </div>
@@ -332,6 +399,30 @@ class TodoApp {
 
     capitalizeFirst(str) {
         return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    formatDueDate(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffTime = date - now;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 0) return `${Math.abs(diffDays)} days ago`;
+        if (diffDays === 0) return 'Today';
+        if (diffDays === 1) return 'Tomorrow';
+        if (diffDays <= 7) return `${diffDays} days`;
+        return date.toLocaleDateString();
+    }
+
+    getDueDateClass(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffTime = date - now;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 0) return 'overdue';
+        if (diffDays <= 3) return 'due-soon';
+        return '';
     }
 
     showNotification(message, type = 'info') {
@@ -401,6 +492,15 @@ class TodoApp {
         return saved ? JSON.parse(saved) : [];
     }
 
+    saveTheme() {
+        localStorage.setItem('isDarkTheme', JSON.stringify(this.isDarkTheme));
+    }
+
+    loadTheme() {
+        const saved = localStorage.getItem('isDarkTheme');
+        return saved ? JSON.parse(saved) : false;
+    }
+
     // Export/Import functionality
     exportTodos() {
         const dataStr = JSON.stringify(this.todos, null, 2);
@@ -457,6 +557,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
             e.preventDefault();
             app.searchInput.focus();
+        }
+        
+        // Ctrl/Cmd + D to toggle theme
+        if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+            e.preventDefault();
+            app.toggleTheme();
+        }
+        
+        // ? to show help
+        if (e.key === '?' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+            e.preventDefault();
+            app.openHelpModal();
         }
     });
 });
