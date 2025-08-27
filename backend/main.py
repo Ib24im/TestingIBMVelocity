@@ -9,7 +9,7 @@ from datetime import datetime
 from database import SessionLocal, engine
 from models import Base, Todo, User
 from schemas import TodoCreate, TodoUpdate, TodoResponse, UserCreate, UserResponse
-from auth import get_current_user, create_access_token, verify_password, get_password_hash
+from auth import get_current_user, create_access_token, verify_password
 import crud
 
 # Create tables

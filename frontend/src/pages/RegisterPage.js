@@ -87,7 +87,7 @@ const RegisterPage = () => {
                 placeholder="Enter your full name"
               />
               {errors.full_name && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.full_name.message}</p>
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{String(errors.full_name.message)}</p>
               )}
             </div>
 
@@ -109,7 +109,7 @@ const RegisterPage = () => {
                 placeholder="Enter your email"
               />
               {errors.email && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email.message}</p>
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{String(errors.email.message)}</p>
               )}
             </div>
 
@@ -144,7 +144,7 @@ const RegisterPage = () => {
                 </button>
               </div>
               {errors.password && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.password.message}</p>
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{String(errors.password.message)}</p>
               )}
             </div>
 
@@ -164,7 +164,7 @@ const RegisterPage = () => {
                 placeholder="Confirm your password"
               />
               {errors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.confirmPassword.message}</p>
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{String(errors.confirmPassword.message)}</p>
               )}
             </div>
           </div>
