@@ -37,11 +37,11 @@ class AuthService {
   }
 
   async login(email, password) {
-    const formData = new FormData();
-    formData.append('email', email);
-    formData.append('password', password);
+    const params = new URLSearchParams();
+    params.append('email', email);
+    params.append('password', password);
 
-    const response = await this.api.post('/auth/login', formData, {
+    const response = await this.api.post('/auth/login', params, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },

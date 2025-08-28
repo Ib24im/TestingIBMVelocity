@@ -5,6 +5,8 @@ import { todoService } from '../services/todoService';
 import { PlusIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { motion } from 'framer-motion';
 
+console.log('TodosPage: todoService imported:', todoService);
+
 const TodosPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState('all');
@@ -25,7 +27,19 @@ const TodosPage = () => {
   );
 
   // Create todo mutation
-  const createTodoMutation = useMutation(todoService.createTodo, {
+  const createTodoMutation = useMutation(
+    (todoData) => {
+      console.log('Mutation function called with:', todoData);
+      console.log('todoService:', todoService);
+      if (!todoService) {
+        throw new Error('todoService is not available');
+      }
+      if (!todoService.createTodo) {
+        throw new Error('todoService.createTodo is not available');
+      }
+      return todoService.createTodo(todoData);
+    },
+    {
     onSuccess: () => {
       queryClient.invalidateQueries('todos');
       setNewTodo('');

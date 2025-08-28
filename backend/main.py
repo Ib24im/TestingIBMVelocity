@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi import FastAPI, HTTPException, Depends, status, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session
@@ -66,7 +66,7 @@ async def register(user: UserCreate, db: Session = Depends(get_db)):
     return db_user
 
 @app.post("/auth/login")
-async def login(email: str, password: str, db: Session = Depends(get_db)):
+async def login(email: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
     """Login user and return access token"""
     user = crud.get_user_by_email(db, email=email)
     if not user or not verify_password(password, user.hashed_password):
