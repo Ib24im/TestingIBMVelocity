@@ -71,12 +71,11 @@ pipeline {
     
     post {
         always {
-            // Collect test results
-            junit allowEmptyResults: true, testResultsPattern: '**/junit*.xml, **/pytest*.xml, **/jest-junit*.xml'
+            // Collect test results with correct syntax
+            junit allowEmptyResults: true, testResults: '**/junit*.xml, **/pytest*.xml, **/jest-junit*.xml'
             
-            // Archive artifacts
-            archiveArtifacts artifacts: 'frontend/build/**', allowEmptyArchive: true
-            archiveArtifacts artifacts: 'backend/dist/**', allowEmptyArchive: true
+            // Archive artifacts with correct syntax
+            archiveArtifacts artifacts: 'frontend/build/**, backend/dist/**, target/**', allowEmptyArchive: true
             
             echo '🧹 Cleaning up...'
         }
