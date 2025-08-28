@@ -30,7 +30,17 @@ const RegisterPage = () => {
       toast.success('Account created successfully! Please sign in.');
       navigate('/login');
     } catch (error) {
-      const message = error.response?.data?.detail || 'Registration failed';
+      console.error('Registration error:', error);
+      let message = 'Registration failed';
+      
+      if (error.response?.data?.detail) {
+        message = typeof error.response.data.detail === 'string' 
+          ? error.response.data.detail 
+          : 'Registration failed';
+      } else if (error.message) {
+        message = typeof error.message === 'string' ? error.message : 'Registration failed';
+      }
+      
       toast.error(message);
     }
   };

@@ -23,7 +23,17 @@ const LoginPage = () => {
       toast.success('Welcome back!');
       navigate('/todos');
     } catch (error) {
-      const message = error.response?.data?.detail || 'Login failed';
+      console.error('Login error:', error);
+      let message = 'Login failed';
+      
+      if (error.response?.data?.detail) {
+        message = typeof error.response.data.detail === 'string' 
+          ? error.response.data.detail 
+          : 'Login failed';
+      } else if (error.message) {
+        message = typeof error.message === 'string' ? error.message : 'Login failed';
+      }
+      
       toast.error(message);
     }
   };
